@@ -3,12 +3,15 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useRecoilValue } from 'recoil';
 import styled from 'styled-components';
 import { tasksState } from '../atoms';
+import AddForm from './add_form';
 import TaskItem from './task';
 
 const Container = styled.section<{ isDragging: boolean }>`
   border-radius: 5px;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   margin-right: 20px;
+  margin-bottom: 20px;
+  width: 330px;
   transition: background-color 0.3s;
   box-shadow: ${(props) =>
     props.isDragging ? '4px 4px 8px rgba(0, 0, 0, 0.1)' : '2px 2px 4px rgba(0, 0, 0, 0.1)'};
@@ -63,6 +66,7 @@ function Column({ title, index }: Props) {
               </List>
             )}
           </Droppable>
+          <AddForm formType="TASK" title={title} />
         </Container>
       )}
     </Draggable>

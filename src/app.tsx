@@ -4,6 +4,8 @@ import { useRecoilState } from 'recoil';
 import { tasksState } from './atoms';
 import Column from './components/column';
 import TrashCan from './components/trash_can';
+import AddForm from './components/add_form';
+import { useEffect } from 'react';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -28,11 +30,16 @@ const Header = styled.header`
   color: rgba(255, 255, 255, 0.9);
   user-select: none;
   line-height: 0;
+  span {
+    margin-left: 10px;
+  }
 `;
 
 const Board = styled.section`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 350px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
   padding: 20px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -40,9 +47,10 @@ const Board = styled.section`
 
 function App() {
   const [tasks, setTasks] = useRecoilState(tasksState);
+  useEffect(() => window.localStorage.setItem('board', JSON.stringify(tasks)), [tasks]);
 
   const onDragEnd = (result: DropResult) => {
-    console.log(result);
+    // console.log(result);
     const { destination, source } = result;
     if (!destination?.droppableId) return;
     if (
@@ -53,9 +61,10 @@ function App() {
         ? // delete column
           setTasks((currVal) => {
             const ordered = [...currVal.ordered];
+            const columnKey = ordered[source.index];
             const columns = { ...currVal.columns };
+            delete columns[columnKey];
             ordered.splice(source.index, 1);
-            delete columns[ordered[source.index]];
             return { columns, ordered };
           })
         : // delete task
@@ -117,15 +126,17 @@ function App() {
   return (
     <Container>
       <Header>
-        <i className="fa-solid fa-table-list"></i> Task Board
+        <i className="fa-solid fa-table-list"></i>
+        <span>Task Board</span>
       </Header>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="board" direction="horizontal" type="COLUMN">
-          {(provided) => (
+          {(provided, snapshot) => (
             <Board ref={provided.innerRef} {...provided.droppableProps}>
               {tasks.ordered.map((key, index) => (
                 <Column key={key} title={key} index={index} />
               ))}
+              {!snapshot.isDraggingOver && <AddForm formType="COLUMN" />}
               {provided.placeholder}
             </Board>
           )}
